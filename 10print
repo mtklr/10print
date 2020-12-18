@@ -1,0 +1,152 @@
+#!/usr/bin/env bash
+# "10 PRINT CHR$(205.5+RND(1)); : GOTO 10" - https://10print.org
+# Some fonts work better than others. Menlo with -u looks good.
+
+trap "cleanup" INT EXIT
+
+# "strict mode"
+set -eu -o pipefail
+
+readonly me=${0##*/}
+
+cols=$(tput cols)
+lines=$(tput lines)
+
+usage () {
+	cat <<EOF >&2
+usage: $me [option ...]
+10 PRINT CHR\$(205.5+RND(1)); : GOTO 10
+
+options:
+  -a  alternate character set
+  -c  color (256 color terminal)
+  -g  grayscale (256 color terminal)
+  -h  show this help and exit
+  -l  large output
+  -m  medium output
+  -p  pause after each screenful of output, \`q' quits
+  -u  unicode
+EOF
+}
+
+cleanup () {
+	[ "$charset" = "acs" ] && tput rmacs
+	[ $pause -eq 1 ] && tput cnorm
+	stty echo
+	exit
+}
+
+rand_color () {
+	# 256 colors
+	local r=$((RANDOM % 213 + 17))
+
+	printf '\e[0;38;5;%im' $r
+
+	# 8/16 color
+	# bright may be just be "bold" in some terminals
+	# local b=31
+	# [[ $((RANDOM % 2)) -eq 1 ]] && b=91
+	# printf '\e[%im' $(( RANDOM % 7 + b ))
+}
+
+rand_gray () {
+	local r=$((RANDOM % 24 + 232))
+
+	printf '\e[0;38;5;%im' $r
+}
+
+print_char () {
+	local c
+
+	[ $color -eq 1 ] && rand_color
+	[ $gray -eq 1 ] && rand_gray
+
+	case $1 in
+		acs )
+			c=106
+			[ $((RANDOM % 2)) -eq 1 ] && c=116
+			printf '%b' "$(printf '\\%o' $((c + (RANDOM % 5))))"
+			;;
+		uni )
+			c='\0342\0225\026'
+			printf '%b' "$c$((RANDOM % 2 + 1))"
+			;;
+		  * )
+			c='/'
+			[ $((RANDOM % 2)) -eq 1 ] && c=\\
+			printf '%c' "$c"
+			;;
+	esac
+}
+
+print () {
+	case $1 in
+		l )
+			local c
+			local line
+			line="$(for (( c=0; c<cols; c++ )); do
+					print_char $charset
+				done)"
+			printf '\e#3%s\n\e#4%s\n' "$line" "$line"
+			;;
+		m )
+			printf '\e#6'
+			print_char $charset
+			;;
+		s )
+			print_char $charset
+			;;
+	esac
+}
+
+# options
+charset=ascii
+color=0
+gray=0
+pause=0
+size=s
+
+while getopts ":acghlmpu" opt; do
+	case $opt in
+		a ) charset=acs; tput smacs ;;
+		c ) color=1; gray=0 ;;
+		g ) color=0; gray=1 ;;
+		h ) usage; exit 0 ;;
+		l ) size=l ;;
+		m ) size=m ;;
+		p ) pause=1 ;;
+		u ) charset=uni ;;
+		? ) usage; exit 1 ;;
+	esac
+done
+
+shift $((OPTIND - 1))
+
+# fill screen and pause
+if [ $pause -eq 1 ]; then
+	tput civis
+
+	while :; do
+		for (( i=0; i<lines; ++i )); do
+			if [ "$size" = "l" ]; then
+				print $size
+				(( i++ ))
+			else
+				for (( c=0; c<cols; c++ )); do
+					print $size
+				done
+			fi
+
+		done
+
+		read -n1 -rs a
+		[ "$a" = "q" ] && exit
+	done
+fi
+
+# continuous
+while :; do
+	print $size
+done
+
+exit
