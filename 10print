@@ -31,7 +31,7 @@ EOF
 
 cleanup () {
 	[ "$charset" = "acs" ] && tput rmacs
-	[ $pause -eq 1 ] && tput cnorm
+	[ "$pause" -eq 1 ] && tput cnorm
 	stty echo
 	exit
 }
@@ -40,7 +40,7 @@ rand_color () {
 	# 256 colors
 	local r=$((RANDOM % 213 + 17))
 
-	printf '\e[0;38;5;%im' $r
+	printf '\e[0;38;5;%im' "$r"
 
 	# 8/16 color
 	# bright may be just be "bold" in some terminals
@@ -52,14 +52,14 @@ rand_color () {
 rand_gray () {
 	local r=$((RANDOM % 24 + 232))
 
-	printf '\e[0;38;5;%im' $r
+	printf '\e[0;38;5;%im' "$r"
 }
 
 print_char () {
 	local c
 
-	[ $color -eq 1 ] && rand_color
-	[ $gray -eq 1 ] && rand_gray
+	[ "$color" -eq 1 ] && rand_color
+	[ "$gray" -eq 1 ] && rand_gray
 
 	case $1 in
 		acs )
@@ -85,16 +85,16 @@ print () {
 			local c
 			local line
 			line="$(for (( c=0; c<cols; c++ )); do
-					print_char $charset
+					print_char "$charset"
 				done)"
 			printf '\e#3%s\n\e#4%s\n' "$line" "$line"
 			;;
 		m )
 			printf '\e#6'
-			print_char $charset
+			print_char "$charset"
 			;;
 		s )
-			print_char $charset
+			print_char "$charset"
 			;;
 	esac
 }
