@@ -30,3 +30,5 @@ options:
 ## Hmm...
 
 Is the banding pattern seen in zoomed-out views of these images the result of bash's pseudo-random number generator?
+
+(No, it's how the Finder column view preview shows the images initially, or when resizing the window).
