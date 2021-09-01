@@ -29,29 +29,24 @@
 #define DELAY_MAX 1000
 #define DELAY_DEF 50
 
-/* unicode */
-#define WCA_BOX 9585	/* &#9585 box drawings diagonal */
-#define WCB_BOX 9586	/* &#9586 box drawings diagonal */
-#define WCA_WINDY 824	/* &#824 combining long solidus overlay */
-#define WCB_WINDY 1826	/* &#1826 Syriac Letter Nun */
-
 int bgcolor = -1;
 int delay = DELAY_DEF;
 int color_flag = 0;
 int windy_flag = 0;
 int unicode_flag = 0;
 
-wchar_t wstra_box[] = { WCA_BOX, L'\0' };
-wchar_t wstrb_box[] = { WCB_BOX, L'\0' };
-wchar_t wstra_windy[] = { WCA_WINDY, L'\0' };
-wchar_t wstrb_windy[] = { WCB_WINDY, L'\0' };
+/* unicode */
+char *stra_box = "\xE2\x95\xB1";	/* &#9585 box drawings diagonal */
+char *strb_box = "\xE2\x95\xB2";	/* &#9586 box drawings diagonal */
+char *stra_windy = "\xCC\xB8";		/* &#824 combining long solidus overlay */
+char *strb_windy = "\xDC\xA2";		/* &#1826 Syriac Letter Nun */
 
 void quit() {
 	endwin();
 	exit(0);
 }
 
-void draw (wchar_t *wstra, wchar_t *wstrb) {
+void draw (char *stra, char *strb) {
 	for (int y = 0; y < LINES; y++) {
 		for (int x = 0; x < COLS; x++) {
 			int r = random() % 2;
@@ -62,13 +57,13 @@ void draw (wchar_t *wstra, wchar_t *wstrb) {
 
 			if (r == 0) {
 				if (unicode_flag == 1) {
-					mvaddwstr(y, x, wstra);
+					mvaddstr(y, x, stra);
 				} else {
 					mvaddch(y, x, '/');
 				}
 			} else {
 				if (unicode_flag == 1) {
-					mvaddwstr(y, x, wstrb);
+					mvaddstr(y, x, strb);
 				} else {
 					mvaddch(y, x, '\\');
 				}
@@ -117,10 +112,10 @@ void resize_win(int sig) {
 int main (int argc, char *argv[]) {
 	int opt, busy;
 	time_t t;
-	wchar_t *wstrap, *wstrbp;
+	char *strap, *strbp;
 
-	wstrap = wstra_box;
-	wstrbp = wstrb_box;
+	strap = stra_box;
+	strbp = strb_box;
 
 	signal(SIGWINCH, resize_win);
 
@@ -150,8 +145,8 @@ int main (int argc, char *argv[]) {
 			case 'w':
 				unicode_flag = 1;
 				windy_flag = 1;
-				wstrap = wstra_windy;
-				wstrbp = wstrb_windy;
+				strap = stra_windy;
+				strbp = strb_windy;
 				break;
 			default:
 				printf("usage: %s [-Bbcuw] [-d 1..%i] \n", argv[0], DELAY_MAX);
@@ -181,7 +176,7 @@ int main (int argc, char *argv[]) {
 				break;
 		}
 
-		draw(wstrap, wstrbp);
+		draw(strap, strbp);
 	}
 
 	quit();
