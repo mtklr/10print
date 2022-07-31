@@ -32,7 +32,8 @@ EOF
 cleanup () {
 	[ "$charset" = "acs" ] && tput rmacs
 	[ "$pause" -eq 1 ] && tput cnorm
-	stty echo
+	stty "$state"
+	clear
 	exit
 }
 
@@ -87,7 +88,7 @@ print () {
 			line="$(for (( c=0; c<cols; c++ )); do
 					print_char "$charset"
 				done)"
-			printf '\e#3%s\n\e#4%s\n' "$line" "$line"
+			printf '\e#3%s\n\r\e#4%s\n\r' "$line" "$line"
 			;;
 		m )
 			printf '\e#6'
@@ -122,6 +123,9 @@ done
 
 shift $((OPTIND - 1))
 
+state=$(stty -g)
+stty raw -echo -icanon min 0
+
 # fill screen and pause
 if [ $pause -eq 1 ]; then
 	tput civis
@@ -145,7 +149,8 @@ if [ $pause -eq 1 ]; then
 fi
 
 # continuous
-while :; do
+while ! IFS=$'\n' read -rs a; do
+	[ "$a" != "" ] && break
 	print $size
 done
 
