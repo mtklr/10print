@@ -81,10 +81,11 @@ print_char () {
 }
 
 print () {
+	local c
+	local line
+
 	case $1 in
 		l )
-			local c
-			local line
 			line="$(for (( c=0; c<cols; c++ )); do
 					print_char "$charset"
 				done)"
@@ -128,15 +129,15 @@ stty raw -echo -icanon min 0
 tput civis
 
 # fill screen and pause
-if [ $pause -eq 1 ]; then
+if [ "$pause" -eq 1 ]; then
 	while :; do
 		for (( i=0; i<lines; ++i )); do
 			if [ "$size" = "l" ]; then
-				print $size
+				print "$size"
 				(( i++ ))
 			else
 				for (( c=0; c<cols; c++ )); do
-					print $size
+					print "$size"
 				done
 			fi
 
@@ -150,7 +151,7 @@ fi
 # continuous
 while ! IFS=$'\n' read -rs a; do
 	[ "$a" != "" ] && break
-	print $size
+	print "$size"
 done
 
 exit
