@@ -11,6 +11,7 @@ readonly me=${0##*/}
 
 cols=$(tput cols)
 lines=$(tput lines)
+state=$(stty -g)
 
 usage () {
 	cat <<EOF >&2
@@ -33,7 +34,7 @@ cleanup () {
 	[ "$charset" = "acs" ] && tput rmacs
 	tput cnorm
 	stty "$state"
-	clear
+	[ "$clearscreen" -eq 1 ] && clear
 	exit
 }
 
@@ -103,6 +104,7 @@ print () {
 
 # options
 charset=ascii
+clearscreen=1
 color=0
 gray=0
 pause=0
@@ -113,18 +115,17 @@ while getopts ":acghlmpu" opt; do
 		a ) charset=acs; tput smacs ;;
 		c ) color=1; gray=0 ;;
 		g ) color=0; gray=1 ;;
-		h ) usage; exit 0 ;;
+		h ) clearscreen=0; usage; exit 0 ;;
 		l ) size=l ;;
 		m ) size=m ;;
 		p ) pause=1 ;;
 		u ) charset=uni ;;
-		? ) usage; exit 1 ;;
+		? ) clearscreen=0; usage; exit 1 ;;
 	esac
 done
 
 shift $((OPTIND - 1))
 
-state=$(stty -g)
 stty raw -echo -icanon min 0
 tput civis
 
