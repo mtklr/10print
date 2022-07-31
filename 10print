@@ -31,7 +31,7 @@ EOF
 
 cleanup () {
 	[ "$charset" = "acs" ] && tput rmacs
-	[ "$pause" -eq 1 ] && tput cnorm
+	tput cnorm
 	stty "$state"
 	clear
 	exit
@@ -125,11 +125,10 @@ shift $((OPTIND - 1))
 
 state=$(stty -g)
 stty raw -echo -icanon min 0
+tput civis
 
 # fill screen and pause
 if [ $pause -eq 1 ]; then
-	tput civis
-
 	while :; do
 		for (( i=0; i<lines; ++i )); do
 			if [ "$size" = "l" ]; then
