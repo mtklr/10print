@@ -85,20 +85,14 @@ print () {
 	local c
 	local line
 
+	line="$(for (( c=0; c<cols; c++ )); do
+			print_char "$charset"
+		done)"
+
 	case $1 in
-		l )
-			line="$(for (( c=0; c<cols; c++ )); do
-					print_char "$charset"
-				done)"
-			printf '\e#3%s\n\r\e#4%s\n\r' "$line" "$line"
-			;;
-		m )
-			printf '\e#6'
-			print_char "$charset"
-			;;
-		s )
-			print_char "$charset"
-			;;
+		l ) printf '\e#3%s\n\r\e#4%s' "$line" "$line" ;;
+		m ) printf '\e#6%s' "$line" ;;
+		s ) printf '%s' "$line" ;;
 	esac
 }
 
@@ -132,14 +126,18 @@ tput civis
 # fill screen and pause
 if [ "$pause" -eq 1 ]; then
 	while :; do
-		for (( i=0; i<lines; ++i )); do
+		for (( i=0; i<lines; i++ )); do
+			if [ "$i" -lt "$lines" ]; then
+				printf '\n\r'
+			else
+				printf '\r'
+			fi
+
 			if [ "$size" = "l" ]; then
 				print "$size"
 				(( i++ ))
 			else
-				for (( c=0; c<cols; c++ )); do
-					print "$size"
-				done
+				print "$size"
 			fi
 
 		done
@@ -152,6 +150,11 @@ fi
 # continuous
 while ! IFS=$'\n' read -rs a; do
 	[ "$a" != "" ] && break
+
+	if [ "$size" != "s" ]; then
+		printf '\n\r'
+	fi
+
 	print "$size"
 done
 
