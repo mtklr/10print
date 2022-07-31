@@ -82,8 +82,11 @@ print_char () {
 }
 
 print () {
-	local c
-	local line
+	local c line r
+
+	# make RANDOM a bit more random
+	r=$RANDOM
+	RANDOM=$r
 
 	line="$(for (( c=0; c<cols; c++ )); do
 			print_char "$charset"
