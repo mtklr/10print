@@ -158,10 +158,7 @@ fi
 while ! IFS=$'\n' read -rs a; do
 	[ "$a" != "" ] && break
 
-	if [ "$size" != "s" ]; then
-		printf '\n\r'
-	fi
-
+	printf '\n\r'
 	print "$size"
 
 	sleep "$delay"
