@@ -19,14 +19,15 @@ usage: $me [option ...]
 10 PRINT CHR\$(205.5+RND(1)); : GOTO 10
 
 options:
-  -a  alternate character set
-  -c  color (256 color terminal)
-  -g  grayscale (256 color terminal)
-  -h  show this help and exit
-  -l  large output
-  -m  medium output
-  -p  pause after each screenful of output, \`q' quits
-  -u  unicode
+  -a      alternate character set
+  -c      color (256 color terminal)
+  -d NUM  delay NUM ms
+  -g      grayscale (256 color terminal)
+  -h      show this help and exit
+  -l      large output
+  -m      medium output
+  -p      pause after each screenful of output, \`q' quits
+  -u      unicode
 EOF
 }
 
@@ -103,14 +104,16 @@ print () {
 charset=ascii
 clearscreen=1
 color=0
+delay=0
 gray=0
 pause=0
 size=s
 
-while getopts ":acghlmpu" opt; do
+while getopts ":acd:ghlmpu" opt; do
 	case $opt in
 		a ) charset=acs; tput smacs ;;
 		c ) color=1; gray=0 ;;
+		d ) [ "${OPTARG//[.0-9]/}" = "" ] && delay="$(bc <<<"scale=2; $OPTARG / 1000")" ;;
 		g ) color=0; gray=1 ;;
 		h ) clearscreen=0; usage; exit 0 ;;
 		l ) size=l ;;
@@ -143,6 +146,7 @@ if [ "$pause" -eq 1 ]; then
 				print "$size"
 			fi
 
+			sleep "$delay"
 		done
 
 		read -n1 -rs a
@@ -159,6 +163,8 @@ while ! IFS=$'\n' read -rs a; do
 	fi
 
 	print "$size"
+
+	sleep "$delay"
 done
 
 exit
