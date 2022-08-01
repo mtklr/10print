@@ -32,8 +32,8 @@ EOF
 }
 
 cleanup () {
-	[ "$charset" = "acs" ] && tput rmacs
 	tput cnorm
+	tput rmacs
 	stty "$state"
 	[ "$clearscreen" -eq 1 ] && clear
 	exit
