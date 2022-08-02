@@ -26,3 +26,5 @@ options:
   -p      pause after each screenful of output, `q' quits
   -u      unicode
 ```
+
+* "Large" and "medium" output need an emulator that supports VT100 [DECDHL Double-Width, Double-Height Line](https://vt100.net/docs/vt100-ug/chapter3.html#DECDHL) and [DECDWL Double-Width Line](https://vt100.net/docs/vt100-ug/chapter3.html#DECDWL) control sequences. (Terminal.app does, oddly enough...)
